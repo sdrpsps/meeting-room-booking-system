@@ -1,0 +1,15 @@
+{
+  "name": "meet-room",
+  "version": "1.0.0",
+  "description": "会议室预订系统",
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

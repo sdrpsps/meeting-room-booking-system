@@ -4,7 +4,7 @@ export class RegisterUserDto {
   @IsNotEmpty({
     message: '用户名不能为空',
   })
-  username: string;
+  userName: string;
 
   @IsNotEmpty({
     message: '昵称不能为空',

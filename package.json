@@ -1,5 +1,5 @@
 {
-  "name": "meet-room",
+  "name": "meeting-room-booking-system",
   "version": "1.0.0",
   "description": "会议室预订系统",
   "workspaces": [
@@ -10,6 +10,6 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
+  "author": "Sunny",
   "license": "ISC"
 }

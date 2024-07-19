@@ -1,18 +1,18 @@
-import { Body, Controller, Get, Inject, Post, Query } from '@nestjs/common';
-import { RedisService } from 'src/redis/redis.service';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { RequireLogin } from 'src/common/decorators/require-login.decorator';
 import { EmailService } from 'src/email/email.service';
-import { RegisterUserDto } from './dto/registerUser.dto';
+import { RedisService } from 'src/redis/redis.service';
+import { LoginUserDto } from './dto/login-user.dto';
+import { RegisterUserDto } from './dto/register-user.dto';
 import { UserService } from './user.service';
 
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
-
-  @Inject(RedisService)
-  private redisService: RedisService;
-
-  @Inject(EmailService)
-  private emailService: EmailService;
+  constructor(
+    private readonly userService: UserService,
+    private readonly redisService: RedisService,
+    private readonly emailService: EmailService,
+  ) {}
 
   @Post('register')
   async register(@Body() registerUser: RegisterUserDto) {
@@ -32,5 +32,27 @@ export class UserController {
     });
 
     return '发送成功';
+  }
+
+  @Post('login')
+  async userLogin(@Body() loginUser: LoginUserDto) {
+    return await this.userService.login(loginUser, false);
+  }
+
+  @Post('admin/login')
+  async adminLogin(@Body() loginUser: LoginUserDto) {
+    return await this.userService.login(loginUser, true);
+  }
+
+  @RequireLogin()
+  @Get('refresh')
+  async refresh(@Query('refreshToken') refreshToken: string) {
+    return await this.userService.refresh(refreshToken, false);
+  }
+
+  @RequireLogin()
+  @Get('admin/refresh')
+  async adminRefresh(@Query('refreshToken') refreshToken: string) {
+    return await this.userService.refresh(refreshToken, true);
   }
 }

@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider          = "mysql"
+  url               = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+}
+
+model User {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  password    String
+  email       String    @unique
+  nickName    String
+  avatar      String?
+  phoneNumber String?
+  isFrozen    Boolean   @default(false)
+  isAdmin     Boolean   @default(false)
+  roleId      Int
+  role        Role      @relation(fields: [roleId], references: [id])
+  bookings    Booking[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Role {
+  id          Int              @id @default(autoincrement())
+  name        String           @unique
+  description String?
+  users       User[]
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  permissions RolePermission[]
+}
+
+model Permission {
+  id          Int              @id @default(autoincrement())
+  code        String           @unique
+  description String?
+  roles       RolePermission[]
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+}
+
+model RolePermission {
+  roleId       Int
+  role         Role       @relation(fields: [roleId], references: [id])
+  permissionId Int
+  permission   Permission @relation(fields: [permissionId], references: [id])
+
+  @@id([roleId, permissionId])
+}
+
+model MeetingRoom {
+  id          Int       @id @default(autoincrement()) // 会议室ID
+  name        String // 会议室名字
+  capacity    Int // 会议室容量
+  location    String // 会议室位置
+  equipment   String // 会议室设备
+  description String // 会议室描述
+  isBooked    Boolean // 是否被预订
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  bookings    Booking[]
+}
+
+model Booking {
+  id        Int         @id @default(autoincrement()) // 预订ID
+  userId    Int // 预订人ID
+  user      User        @relation(fields: [userId], references: [id])
+  roomId    Int // 会议室ID
+  room      MeetingRoom @relation(fields: [roomId], references: [id])
+  startTime DateTime // 开始时间
+  endTime   DateTime // 结束时间
+  status    String // 预订状态（申请中、审批通过、审批驳回、已解除）
+  note      String // 备注
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+}

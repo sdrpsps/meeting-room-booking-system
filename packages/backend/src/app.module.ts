@@ -1,46 +1,39 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { UserModule } from './user/user.module';
-import { User } from './user/entities/user.entity';
-import { Role } from './user/entities/role.entity';
-import { Permission } from './user/entities/permission.entity';
-import { RedisModule } from './redis/redis.module';
-import { EmailModule } from './email/email.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtModule } from '@nestjs/jwt';
+import { LoginGuard } from './common/guards/login.guard';
+import { PermissionGuard } from './common/guards/permission.guard';
+import { EmailModule } from './email/email.module';
+import { RedisModule } from './redis/redis.module';
+import { UserModule } from './user/user.module';
+import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    TypeOrmModule.forRootAsync({
+    JwtModule.registerAsync({
+      global: true,
       useFactory(configService: ConfigService) {
         return {
-          type: 'mysql',
-          host: configService.get('MYSQL_SERVER_HOST'),
-          port: configService.get('MYSQL_SERVER_PORT'),
-          username: configService.get('MYSQL_SERVER_USERNAME'),
-          password: configService.get('MYSQL_SERVER_PASSWORD'),
-          database: configService.get('MYSQL_SERVER_DB'),
-          synchronize: true,
-          logging: true,
-          entities: [User, Role, Permission],
-          poolSize: 10,
-          connectorPackage: 'mysql2',
-          extra: {
-            authPlugins: 'sha256_password',
+          secret: configService.get('JWT_SECRET'),
+          signOptions: {
+            expiresIn: configService.get('JWT_ACCESS_TOKEN_EXPIRES_TIME'),
           },
         };
       },
       inject: [ConfigService],
     }),
+    PrismaModule,
     UserModule,
     RedisModule,
     EmailModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    { provide: APP_GUARD, useClass: LoginGuard },
+    { provide: APP_GUARD, useClass: PermissionGuard },
+  ],
 })
 export class AppModule {}

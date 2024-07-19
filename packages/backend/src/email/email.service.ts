@@ -6,7 +6,7 @@ import { createTransport, Transporter } from 'nodemailer';
 export class EmailService {
   private transporter: Transporter;
 
-  constructor(private configService: ConfigService) {
+  constructor(private readonly configService: ConfigService) {
     this.transporter = createTransport({
       host: configService.get('NODEMAILER_HOST'),
       port: configService.get('NODEMAILER_PORT'),

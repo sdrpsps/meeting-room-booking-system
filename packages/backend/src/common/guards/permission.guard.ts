@@ -10,7 +10,7 @@ import { Observable } from 'rxjs';
 import { Request } from 'express';
 
 interface JwtUserData {
-  userId: number;
+  id: number;
   name: string;
   role: string;
   permissions: string[];

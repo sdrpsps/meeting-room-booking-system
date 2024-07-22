@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { UserInfo } from 'src/user/vo/login-user.vo';
+import { UserInfo } from 'src/user/vo/user-info.vo';
 
 @Injectable()
 export class JwtTokenService {
@@ -13,7 +13,7 @@ export class JwtTokenService {
   generateAccessToken(userInfo: UserInfo) {
     return this.jwtService.sign(
       {
-        userId: userInfo.id,
+        id: userInfo.id,
         name: userInfo.name,
         role: userInfo.role,
         permissions: userInfo.permissions,
@@ -27,7 +27,7 @@ export class JwtTokenService {
   generateRefreshToken(userInfo: UserInfo) {
     return this.jwtService.sign(
       {
-        userId: userInfo.id,
+        id: userInfo.id,
       },
       {
         expiresIn: this.configService.get('JWT_REFRESH_TOKEN_EXPIRES_TIME'),

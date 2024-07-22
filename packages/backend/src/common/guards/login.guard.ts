@@ -11,7 +11,7 @@ import { Observable } from 'rxjs';
 import { Request } from 'express';
 
 interface JwtUserData {
-  userId: number;
+  id: number;
   name: string;
   role: string;
   permissions: string[];
@@ -64,7 +64,7 @@ export class LoginGuard implements CanActivate {
       const data = this.jwtService.verify<JwtUserData>(token);
 
       request.user = {
-        userId: data.userId,
+        id: data.id,
         name: data.name,
         role: data.role,
         permissions: data.permissions,

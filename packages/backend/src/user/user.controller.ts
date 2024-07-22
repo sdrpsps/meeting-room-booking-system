@@ -23,7 +23,7 @@ export class UserController {
   async registerCaptcha(@Query('address') address: string) {
     const code = Math.random().toString().slice(2, 8);
 
-    await this.redisService.set(`captcha_${address}`, code, 5 * 60);
+    await this.redisService.set(`register_captcha_${address}`, code, 5 * 60);
 
     await this.emailService.sendMail({
       to: address,
@@ -36,23 +36,12 @@ export class UserController {
 
   @Post('login')
   async userLogin(@Body() loginUser: LoginUserDto) {
-    return await this.userService.login(loginUser, false);
+    return await this.userService.login(loginUser);
   }
 
-  @Post('admin/login')
-  async adminLogin(@Body() loginUser: LoginUserDto) {
-    return await this.userService.login(loginUser, true);
-  }
-
-  @RequireLogin()
   @Get('refresh')
-  async refresh(@Query('refreshToken') refreshToken: string) {
-    return await this.userService.refresh(refreshToken, false);
-  }
-
   @RequireLogin()
-  @Get('admin/refresh')
-  async adminRefresh(@Query('refreshToken') refreshToken: string) {
-    return await this.userService.refresh(refreshToken, true);
+  async refresh(@Query('refreshToken') refreshToken: string) {
+    return await this.userService.refresh(refreshToken);
   }
 }

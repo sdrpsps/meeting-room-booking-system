@@ -15,6 +15,7 @@ import { LoginUserDto } from './dto/login-user.dto';
 import { RegisterUserDto } from './dto/register-user.dto';
 import { LoginUserVo } from './vo/login-user.vo';
 import { JwtService } from '@nestjs/jwt';
+import { UserInfoVo } from './vo/user-info.vo';
 
 @Injectable()
 export class UserService {
@@ -28,14 +29,10 @@ export class UserService {
   @Inject(RedisService)
   private redisService: RedisService;
 
-  private async findUser(
-    condition: Prisma.UserWhereUniqueInput,
-    isAdmin: boolean,
-  ) {
+  private async findUser(condition: Prisma.UserWhereUniqueInput) {
     return await this.prismaService.user.findUnique({
       where: {
         ...condition,
-        isAdmin,
       },
       include: {
         role: {
@@ -51,44 +48,49 @@ export class UserService {
     });
   }
 
-  async findOneByName(user: LoginUserDto, isAdmin: boolean) {
-    return await this.findUser({ name: user.userName }, isAdmin);
+  async findOneByName(user: LoginUserDto) {
+    return await this.findUser({ name: user.userName });
   }
 
-  async findOneById(userId: number, isAdmin: boolean) {
-    return await this.findUser({ id: userId }, isAdmin);
+  async findOneById(userId: number) {
+    return await this.findUser({ id: userId });
   }
 
   generateUserInfoVo(
     foundUser: Prisma.PromiseReturnType<typeof this.findUser>,
     generateToken: boolean = false,
   ) {
-    const vo = new LoginUserVo();
-    vo.userInfo = {
-      id: foundUser.id,
-      name: foundUser.name,
-      nickName: foundUser.nickName,
-      email: foundUser.email,
-      avatar: foundUser.avatar,
-      phoneNumber: foundUser.phoneNumber,
-      isFrozen: foundUser.isFrozen,
-      isAdmin: foundUser.isAdmin,
-      role: foundUser.role.name,
-      permissions: foundUser.role.permissions.map(
-        (permission) => permission.permission.code,
-      ),
-    };
+    const vo = new UserInfoVo();
+
+    vo.id = foundUser.id;
+    vo.name = foundUser.name;
+    vo.nickName = foundUser.nickName;
+    vo.email = foundUser.email;
+    vo.avatar = foundUser.avatar;
+    vo.phoneNumber = foundUser.phoneNumber;
+    vo.isFrozen = foundUser.isFrozen;
+    vo.isAdmin = foundUser.isAdmin;
+    vo.role = foundUser.role.name;
+    vo.permissions = foundUser.role.permissions.map(
+      (permission) => permission.permission.code,
+    );
 
     if (generateToken) {
-      vo.accessToken = this.jwtTokenService.generateAccessToken(vo.userInfo);
-      vo.refreshToken = this.jwtTokenService.generateRefreshToken(vo.userInfo);
+      const loginVo = new LoginUserVo();
+      loginVo.userInfo = vo;
+      loginVo.accessToken = this.jwtTokenService.generateAccessToken(vo);
+      loginVo.refreshToken = this.jwtTokenService.generateRefreshToken(vo);
+
+      return loginVo;
     }
 
     return vo;
   }
 
   async register(user: RegisterUserDto) {
-    const captcha = await this.redisService.get(`captcha_${user.email}`);
+    const captcha = await this.redisService.get(
+      `register_captcha_${user.email}`,
+    );
 
     if (!captcha) {
       throw new HttpException('验证码已过期', HttpStatus.BAD_REQUEST);
@@ -123,8 +125,8 @@ export class UserService {
     }
   }
 
-  async login(user: LoginUserDto, isAdmin: boolean) {
-    const foundUser = await this.findOneByName(user, isAdmin);
+  async login(user: LoginUserDto) {
+    const foundUser = await this.findOneByName(user);
 
     if (!foundUser) {
       throw new HttpException('用户不存在', HttpStatus.BAD_REQUEST);
@@ -137,12 +139,12 @@ export class UserService {
     return this.generateUserInfoVo(foundUser, true);
   }
 
-  async refresh(refreshToken: string, isAdmin: boolean) {
+  async refresh(refreshToken: string) {
     try {
       const data = this.jwtService.verify(refreshToken);
 
-      const foundUser = await this.findOneById(data.userId, isAdmin);
-      const vo = this.generateUserInfoVo(foundUser, true);
+      const foundUser = await this.findOneById(data.userId);
+      const vo = this.generateUserInfoVo(foundUser, true) as LoginUserVo;
 
       return {
         access_token: vo.accessToken,

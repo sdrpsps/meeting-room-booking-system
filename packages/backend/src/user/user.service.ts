@@ -16,6 +16,8 @@ import { RegisterUserDto } from './dto/register-user.dto';
 import { LoginUserVo } from './vo/login-user.vo';
 import { JwtService } from '@nestjs/jwt';
 import { UserInfoVo } from './vo/user-info.vo';
+import { UpdatePasswordDto } from './dto/update-password.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UserService {
@@ -152,6 +154,70 @@ export class UserService {
       };
     } catch (error) {
       throw new UnauthorizedException('token 失效');
+    }
+  }
+
+  async info(userId: number) {
+    const foundUser = await this.findOneById(userId);
+
+    return this.generateUserInfoVo(foundUser);
+  }
+
+  async updatePassword(userId: number, updatePasswordDto: UpdatePasswordDto) {
+    const captcha = await this.redisService.get(
+      `update_password_captcha_${updatePasswordDto.email}`,
+    );
+
+    if (!captcha) {
+      throw new HttpException('验证码已过期', HttpStatus.BAD_REQUEST);
+    }
+
+    if (updatePasswordDto.captcha !== captcha) {
+      throw new HttpException('验证码错误', HttpStatus.BAD_REQUEST);
+    }
+
+    try {
+      await this.prismaService.user.update({
+        where: {
+          id: userId,
+        },
+        data: {
+          password: md5(updatePasswordDto.password),
+        },
+      });
+      return '修改成功';
+    } catch (error) {
+      this.logger.error(error, UserService);
+      return '修改失败';
+    }
+  }
+
+  async updateUser(userId: number, updateUserDto: UpdateUserDto) {
+    const captcha = await this.redisService.get(
+      `update_user_captcha_${updateUserDto.email}`,
+    );
+
+    if (!captcha) {
+      throw new HttpException('验证码已过期', HttpStatus.BAD_REQUEST);
+    }
+
+    if (updateUserDto.captcha !== captcha) {
+      throw new HttpException('验证码错误', HttpStatus.BAD_REQUEST);
+    }
+
+    try {
+      await this.prismaService.user.update({
+        where: { id: userId },
+        data: {
+          avatar: updateUserDto.avatar,
+          nickName: updateUserDto.nickName,
+          email: updateUserDto.email,
+        },
+      });
+      return '修改成功';
+    } catch (error) {
+      this.logger.error(error, UserService);
+      return '修改失败';
     }
   }
 }

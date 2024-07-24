@@ -6,6 +6,7 @@ import {
   Logger,
   UnauthorizedException,
 } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { Prisma } from '@prisma/client';
 import { JwtTokenService } from 'src/common/services/jwt-token.service';
 import { md5 } from 'src/common/utils/md5.util';
@@ -13,11 +14,10 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { RedisService } from 'src/redis/redis.service';
 import { LoginUserDto } from './dto/login-user.dto';
 import { RegisterUserDto } from './dto/register-user.dto';
-import { LoginUserVo } from './vo/login-user.vo';
-import { JwtService } from '@nestjs/jwt';
-import { UserInfoVo } from './vo/user-info.vo';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { LoginUserVo } from './vo/login-user.vo';
+import { UserInfoVo } from './vo/user-info.vo';
 
 @Injectable()
 export class UserService {
@@ -145,7 +145,7 @@ export class UserService {
     try {
       const data = this.jwtService.verify(refreshToken);
 
-      const foundUser = await this.findOneById(data.userId);
+      const foundUser = await this.findOneById(data.id);
       const vo = this.generateUserInfoVo(foundUser, true) as LoginUserVo;
 
       return {
@@ -219,5 +219,65 @@ export class UserService {
       this.logger.error(error, UserService);
       return '修改失败';
     }
+  }
+
+  async freezeUserById(userId: number) {
+    try {
+      await this.prismaService.user.update({
+        where: {
+          id: userId,
+        },
+        data: {
+          isFrozen: true,
+        },
+      });
+      return '冻结成功';
+    } catch (error) {
+      this.logger.error(error, UserService);
+      return '冻结失败';
+    }
+  }
+
+  async findUsersByPage(
+    pageNum: number,
+    pageSize: number,
+    name?: string,
+    nickName?: string,
+    email?: string,
+  ) {
+    // 构建 where 条件对象
+    const where: Prisma.UserWhereInput = {};
+    if (name) {
+      where.name = { contains: name };
+    }
+    if (nickName) {
+      where.nickName = { contains: nickName };
+    }
+    if (email) {
+      where.email = { contains: email };
+    }
+
+    const [total, users] = await this.prismaService.$transaction([
+      this.prismaService.user.count({
+        where,
+      }),
+      this.prismaService.user.findMany({
+        where,
+        take: pageSize,
+        skip: (pageNum - 1) * pageSize,
+        orderBy: {
+          id: 'desc',
+        },
+      }),
+    ]);
+
+    return {
+      total,
+      users: users.map((item) => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { password, ...rest } = item;
+        return rest;
+      }),
+    };
   }
 }

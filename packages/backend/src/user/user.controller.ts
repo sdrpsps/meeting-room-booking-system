@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  DefaultValuePipe,
+  Get,
+  ParseIntPipe,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { RequireLogin } from 'src/common/decorators/require-login.decorator';
 import { CaptchaService } from 'src/common/services/captcha.service';
 import { UserInfo } from './decorators/user-info.decorator';
@@ -100,5 +108,28 @@ export class UserController {
     );
 
     return '发送成功';
+  }
+
+  @Get('freeze')
+  @RequireLogin()
+  async freeze(@Query('id', ParseIntPipe) userId: number) {
+    return await this.userService.freezeUserById(userId);
+  }
+
+  @Get('list')
+  async list(
+    @Query('pageNum', new DefaultValuePipe(1), ParseIntPipe) pageNum: number,
+    @Query('pageSize', new DefaultValuePipe(2), ParseIntPipe) pageSize: number,
+    @Query('name') name?: string,
+    @Query('nickName') nickName?: string,
+    @Query('email') email?: string,
+  ) {
+    return await this.userService.findUsersByPage(
+      pageNum,
+      pageSize,
+      name,
+      nickName,
+      email,
+    );
   }
 }

@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "会议室预订系统",
   "workspaces": [
-    "frontend",
-    "backend"
+    "front-end",
+    "back-end"
   ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

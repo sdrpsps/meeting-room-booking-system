@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   DefaultValuePipe,
@@ -30,6 +31,8 @@ export class UserController {
 
   @Get('register-captcha')
   async registerCaptcha(@Query('address') address: string) {
+    if (!address) throw new BadRequestException('请输入邮箱地址');
+
     const code = await this.captchaService.setCaptcha(
       `register_captcha_${address}`,
     );
@@ -63,6 +66,8 @@ export class UserController {
   @Get('update_password/captcha')
   @RequireLogin()
   async updatePasswordCaptcha(@Query('address') address: string) {
+    if (!address) throw new BadRequestException('请输入邮箱地址');
+
     const code = await this.captchaService.setCaptcha(
       `update_password_captcha_${address}`,
     );
@@ -97,6 +102,8 @@ export class UserController {
   @Get('update/captcha')
   @RequireLogin()
   async updateUserCaptcha(@Query('address') address: string) {
+    if (!address) throw new BadRequestException('请输入邮箱地址');
+
     const code = await this.captchaService.setCaptcha(
       `update_user_captcha_${address}`,
     );

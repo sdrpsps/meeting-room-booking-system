@@ -1,14 +1,12 @@
-import fetchWrapper from "./fetchWrapper";
+export interface Response<T> {
+  code: number;
+  data: T;
+  message: string;
+}
 
 export interface LoginUser {
   userName: string;
   password: string;
-}
-
-export interface LoginResponse {
-  code: number;
-  data: LoginData;
-  message: string;
 }
 
 export interface LoginData {
@@ -30,9 +28,10 @@ export interface UserInfo {
   role: string;
 }
 
-export function login(data: LoginUser): Promise<LoginResponse> {
-  return fetchWrapper<LoginResponse>("/user/login", {
-    method: "POST",
-    body: data,
-  });
+export interface RegisterUser {
+  userName: string;
+  password: string;
+  nickName: string;
+  email: string;
+  captcha: string;
 }

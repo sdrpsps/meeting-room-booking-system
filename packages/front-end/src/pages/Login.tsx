@@ -1,24 +1,33 @@
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { useLocalStorageState, useRequest } from "ahooks";
 import { Button, Checkbox, Form, Input, message } from "antd";
-import { useNavigate } from "react-router-dom";
-import { login, type LoginUser } from "../api/login";
+import { Link, useNavigate } from "react-router-dom";
+import { login } from "../api/request";
+import type { LoginUser } from "../api/types";
 
 interface FormLoginUser extends LoginUser {
   remember: boolean;
 }
 
 export function Login() {
-  const [, setJwt] = useLocalStorageState("jwtAuth");
+  const [, setAccessToken] = useLocalStorageState("accessToken");
+  const [, setRefreshToken] = useLocalStorageState("refreshToken");
+  const [, setUserInfo] = useLocalStorageState("userInfo");
   const navigate = useNavigate();
 
   const { run, loading } = useRequest(login, {
     manual: true,
     onSuccess: (result) => {
       message.success("登录成功");
-      const { accessToken, refreshToken } = result.data;
-      setJwt({ accessToken, refreshToken });
-      navigate("/");
+
+      const { accessToken, refreshToken, userInfo } = result.data;
+      setAccessToken(accessToken);
+      setRefreshToken(refreshToken);
+      setUserInfo(userInfo);
+
+      setTimeout(() => {
+        navigate("/");
+      }, 1500);
     },
     onError: (error) => {
       message.error(error.message);
@@ -49,8 +58,8 @@ export function Login() {
         </Form.Item>
         <Form.Item>
           <div className="flex justify-between text-blue">
-            <a>创建帐号</a>
-            <a>忘记密码</a>
+            <Link to="/register">创建帐号</Link>
+            <Link to="/forgot-password">忘记密码</Link>
           </div>
         </Form.Item>
         <Form.Item

@@ -35,3 +35,9 @@ export interface RegisterUser {
   email: string;
   captcha: string;
 }
+
+export interface UpdatePasswordUser {
+  email: string;
+  password: string;
+  captcha: string;
+}

@@ -1,5 +1,11 @@
 import ky from "ky";
-import type { LoginData, LoginUser, RegisterUser, Response } from "./types";
+import type {
+  LoginData,
+  LoginUser,
+  RegisterUser,
+  Response,
+  UpdatePasswordUser,
+} from "./types";
 
 const request = ky.create({
   prefixUrl: import.meta.env.VITE_API_ADDRESS,
@@ -35,5 +41,17 @@ export const register = async (data: RegisterUser) => {
 export const getRegisterCaptcha = async (address: string) => {
   return request
     .get("user/register-captcha", { searchParams: { address } })
+    .json<Response<string>>();
+};
+
+export const updatePassword = async (data: UpdatePasswordUser) => {
+  return request
+    .post("user/update_password", { json: data })
+    .json<Response<string>>();
+};
+
+export const getUpdatePasswordCaptcha = async (address: string) => {
+  return request
+    .get("user/update_password/captcha", { searchParams: { address } })
     .json<Response<string>>();
 };

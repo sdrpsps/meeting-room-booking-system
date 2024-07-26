@@ -1,31 +1,28 @@
-import {
-  LockOutlined,
-  MailOutlined,
-  NumberOutlined,
-  UserOutlined,
-} from "@ant-design/icons";
+import { LockOutlined, MailOutlined, NumberOutlined } from "@ant-design/icons";
 import { useCountDown, useRequest } from "ahooks";
 import { Button, Col, Form, Input, message, Row } from "antd";
 import { useForm } from "antd/es/form/Form";
 import { useCallback, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { getRegisterCaptcha, register } from "../api/request";
-import type { RegisterUser } from "../api/types";
+import {
+  getUpdatePasswordCaptcha,
+  updatePassword
+} from "../api/request";
+import type { UpdatePasswordUser } from "../api/types";
 
-interface FormRegisterUser extends RegisterUser {
+interface FormUpdatePasswordUser extends UpdatePasswordUser {
   confirmPassword: boolean;
 }
 
-export function Register() {
+export function ForgotPassword() {
   const navigate = useNavigate();
   const [form] = useForm();
   const [targetDate, setTargetDate] = useState<number>();
   const [countdown] = useCountDown({
     targetDate,
   });
-
   const { run: getCaptcha, loading: captchaLoading } = useRequest(
-    getRegisterCaptcha,
+    getUpdatePasswordCaptcha,
     {
       manual: true,
       onSuccess: () => {
@@ -38,10 +35,10 @@ export function Register() {
     }
   );
 
-  const { run: runRegister, loading: registerLoading } = useRequest(register, {
+  const { run: runUpdatePassword, loading: updatePasswordLoading } = useRequest(updatePassword, {
     manual: true,
     onSuccess: () => {
-      message.success("注册成功");
+      message.success("修改成功");
 
       setTimeout(() => {
         navigate("/login");
@@ -70,59 +67,16 @@ export function Register() {
       });
   }, [form, getCaptcha]);
 
-  const onFinish = (values: FormRegisterUser) => {
+  const onFinish = (values: FormUpdatePasswordUser) => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { confirmPassword, ...rest } = values;
-    runRegister(rest);
+    runUpdatePassword(rest);
   };
 
   return (
     <div className="max-w-sm mx-auto">
       <h1 className="text-2xl font-bold py-6 text-center">会议室预订系统</h1>
       <Form form={form} onFinish={onFinish}>
-        <Form.Item
-          name="userName"
-          rules={[{ required: true, message: "请输入用户名!" }]}
-          hasFeedback
-        >
-          <Input prefix={<UserOutlined />} placeholder="用户名" />
-        </Form.Item>
-        <Form.Item
-          name="nickName"
-          rules={[{ required: true, message: "请输入昵称!" }]}
-          hasFeedback
-        >
-          <Input prefix={<UserOutlined />} placeholder="昵称" />
-        </Form.Item>
-        <Form.Item
-          name="password"
-          rules={[{ required: true, message: "请输入密码!" }]}
-          hasFeedback
-        >
-          <Input.Password prefix={<LockOutlined />} placeholder="密码" />
-        </Form.Item>
-        <Form.Item
-          name="confirmPassword"
-          dependencies={["password"]}
-          rules={[
-            { required: true, message: "请输入确认密码!" },
-            ({ getFieldValue }) => ({
-              validator(_, value) {
-                if (!value || getFieldValue("password") === value) {
-                  return Promise.resolve();
-                }
-                return Promise.reject(new Error("两次密码不一致!"));
-              },
-            }),
-          ]}
-          hasFeedback
-        >
-          <Input.Password
-            prefix={<LockOutlined />}
-            type="password"
-            placeholder="确认密码"
-          />
-        </Form.Item>
         <Form.Item
           name="email"
           rules={[
@@ -160,6 +114,35 @@ export function Register() {
             </Col>
           </Row>
         </Form.Item>
+        <Form.Item
+          name="password"
+          rules={[{ required: true, message: "请输入密码!" }]}
+          hasFeedback
+        >
+          <Input.Password prefix={<LockOutlined />} placeholder="密码" />
+        </Form.Item>
+        <Form.Item
+          name="confirmPassword"
+          dependencies={["password"]}
+          rules={[
+            { required: true, message: "请输入确认密码!" },
+            ({ getFieldValue }) => ({
+              validator(_, value) {
+                if (!value || getFieldValue("password") === value) {
+                  return Promise.resolve();
+                }
+                return Promise.reject(new Error("两次密码不一致!"));
+              },
+            }),
+          ]}
+          hasFeedback
+        >
+          <Input.Password
+            prefix={<LockOutlined />}
+            type="password"
+            placeholder="确认密码"
+          />
+        </Form.Item>
         <Form.Item>
           <div className="flex justify-end">
             已有账号？去
@@ -173,9 +156,9 @@ export function Register() {
             type="primary"
             htmlType="submit"
             className="w-full"
-            loading={registerLoading}
+            loading={updatePasswordLoading}
           >
-            注册
+            修改密码
           </Button>
         </Form.Item>
       </Form>

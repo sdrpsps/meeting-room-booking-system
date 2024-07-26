@@ -9,9 +9,9 @@ export class CaptchaService {
     private readonly emailService: EmailService,
   ) {}
 
-  async setCaptcha(key: string) {
+  async setCaptcha(key: string, minutes: number = 5) {
     const code = Math.random().toString().slice(2, 8);
-    await this.redisService.set(key, code, 5 * 60);
+    await this.redisService.set(key, code, minutes * 60);
 
     return code;
   }

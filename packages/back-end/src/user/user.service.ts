@@ -58,6 +58,14 @@ export class UserService {
     return await this.findUser({ id: userId });
   }
 
+  async findOneByEmail(email: string) {
+    return await this.prismaService.user.findUnique({
+      where: {
+        email,
+      },
+    });
+  }
+
   generateUserInfoVo(
     foundUser: Prisma.PromiseReturnType<typeof this.findUser>,
     generateToken: boolean = false,
@@ -123,7 +131,7 @@ export class UserService {
       return '注册成功';
     } catch (error) {
       this.logger.error(error, UserService);
-      return '注册失败';
+      throw new HttpException('注册失败', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -188,7 +196,7 @@ export class UserService {
       return '修改成功';
     } catch (error) {
       this.logger.error(error, UserService);
-      return '修改失败';
+      throw new HttpException('修改失败', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -217,7 +225,7 @@ export class UserService {
       return '修改成功';
     } catch (error) {
       this.logger.error(error, UserService);
-      return '修改失败';
+      throw new HttpException('修改失败', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -234,7 +242,7 @@ export class UserService {
       return '冻结成功';
     } catch (error) {
       this.logger.error(error, UserService);
-      return '冻结失败';
+      throw new HttpException('冻结失败', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 

@@ -40,7 +40,7 @@ export class UserController {
     await this.captchaService.sendCaptcha(
       address,
       '注册验证码',
-      `<p>你的注册验证码是 ${code}</p>`,
+      `<p>你的注册验证码是 ${code}，5分钟内有效。</p>`,
     );
 
     return '发送成功';
@@ -64,9 +64,11 @@ export class UserController {
   }
 
   @Get('update_password/captcha')
-  @RequireLogin()
   async updatePasswordCaptcha(@Query('address') address: string) {
     if (!address) throw new BadRequestException('请输入邮箱地址');
+
+    const foundUser = await this.userService.findOneByEmail(address);
+    if (!foundUser) throw new BadRequestException('用户不存在');
 
     const code = await this.captchaService.setCaptcha(
       `update_password_captcha_${address}`,
@@ -75,19 +77,23 @@ export class UserController {
     await this.captchaService.sendCaptcha(
       address,
       '修改密码验证码',
-      `<p>你的修改密码验证码是 ${code}</p>`,
+      `<p>你的修改密码验证码是 ${code}，5分钟内有效。</p>`,
     );
 
     return '发送成功';
   }
 
   @Post('update_password')
-  @RequireLogin()
   async updatePassword(
-    @UserInfo('id') id: number,
+    @UserInfo('id') id: number | undefined,
     @Body() passwordDto: UpdatePasswordDto,
   ) {
-    return await this.userService.updatePassword(id, passwordDto);
+    const userId =
+      id ?? (await this.userService.findOneByEmail(passwordDto.email))?.id;
+
+    if (!userId) throw new BadRequestException('用户不存在');
+
+    return await this.userService.updatePassword(userId, passwordDto);
   }
 
   @Post('update')
@@ -111,7 +117,7 @@ export class UserController {
     await this.captchaService.sendCaptcha(
       address,
       '修改用户信息验证码',
-      `<p>你的修改用户信息验证码是 ${code}</p>`,
+      `<p>你的修改用户信息验证码是 ${code}，5分钟内有效。</p>`,
     );
 
     return '发送成功';

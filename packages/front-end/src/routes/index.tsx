@@ -25,4 +25,5 @@ const routes: RouteObject[] = [
   }
 ];
 
-export const router = createBrowserRouter(routes);
+// https://github.com/remix-run/react-router/issues/10787
+export const router: ReturnType<typeof createBrowserRouter> = createBrowserRouter(routes);

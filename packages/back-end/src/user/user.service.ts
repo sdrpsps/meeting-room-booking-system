@@ -14,6 +14,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { RedisService } from 'src/redis/redis.service';
 import { LoginUserDto } from './dto/login-user.dto';
 import { RegisterUserDto } from './dto/register-user.dto';
+import type { UpdateEmailDto } from './dto/update-email.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { LoginUserVo } from './vo/login-user.vo';
@@ -110,6 +111,8 @@ export class UserService {
       throw new HttpException('验证码错误', HttpStatus.BAD_REQUEST);
     }
 
+    await this.redisService.delete(`register_captcha_${user.email}`);
+
     const foundUser = await this.prismaService.user.findUnique({
       where: { name: user.userName },
     });
@@ -157,8 +160,8 @@ export class UserService {
       const vo = this.generateUserInfoVo(foundUser, true) as LoginUserVo;
 
       return {
-        access_token: vo.accessToken,
-        refresh_token: vo.refreshToken,
+        accessToken: vo.accessToken,
+        refreshToken: vo.refreshToken,
       };
     } catch (error) {
       throw new UnauthorizedException('token 失效');
@@ -184,6 +187,10 @@ export class UserService {
       throw new HttpException('验证码错误', HttpStatus.BAD_REQUEST);
     }
 
+    await this.redisService.delete(
+      `update_password_captcha_${updatePasswordDto.email}`,
+    );
+
     try {
       await this.prismaService.user.update({
         where: {
@@ -191,6 +198,39 @@ export class UserService {
         },
         data: {
           password: md5(updatePasswordDto.password),
+        },
+      });
+      return '修改成功';
+    } catch (error) {
+      this.logger.error(error, UserService);
+      throw new HttpException('修改失败', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  async updateEmail(userId: number, updateEmailDto: UpdateEmailDto) {
+    const captcha = await this.redisService.get(
+      `update_email_captcha_${updateEmailDto.email}`,
+    );
+
+    if (!captcha) {
+      throw new HttpException('验证码已过期', HttpStatus.BAD_REQUEST);
+    }
+
+    if (updateEmailDto.captcha !== captcha) {
+      throw new HttpException('验证码错误', HttpStatus.BAD_REQUEST);
+    }
+
+    await this.redisService.delete(
+      `update_email_captcha_${updateEmailDto.email}`,
+    );
+
+    try {
+      await this.prismaService.user.update({
+        where: {
+          id: userId,
+        },
+        data: {
+          email: updateEmailDto.newEmail,
         },
       });
       return '修改成功';
@@ -213,6 +253,10 @@ export class UserService {
       throw new HttpException('验证码错误', HttpStatus.BAD_REQUEST);
     }
 
+    await this.redisService.delete(
+      `update_user_captcha_${updateUserDto.email}`,
+    );
+
     try {
       await this.prismaService.user.update({
         where: { id: userId },
@@ -220,6 +264,7 @@ export class UserService {
           avatar: updateUserDto.avatar,
           nickName: updateUserDto.nickName,
           email: updateUserDto.email,
+          phoneNumber: updateUserDto.phoneNumber,
         },
       });
       return '修改成功';

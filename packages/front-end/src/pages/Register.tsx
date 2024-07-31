@@ -16,7 +16,7 @@ interface FormRegisterUser extends RegisterUser {
   confirmPassword: boolean;
 }
 
-export function Register() {
+export default function Register() {
   const navigate = useNavigate();
   const [form] = useForm();
   const [targetDate, setTargetDate] = useState<number>();
@@ -77,7 +77,7 @@ export function Register() {
   };
 
   return (
-    <div className="max-w-sm mx-auto">
+    <div className="w-sm h-full mx-auto flex flex-col justify-center">
       <h1 className="text-2xl font-bold py-6 text-center">会议室预订系统</h1>
       <Form form={form} onFinish={onFinish}>
         <Form.Item
@@ -163,7 +163,7 @@ export function Register() {
         <Form.Item>
           <div className="flex justify-end">
             已有账号？去
-            <Link to="/login" className="text-blue">
+            <Link to="/auth/login" className="text-blue">
               登录
             </Link>
           </div>

@@ -36,8 +36,20 @@ export interface RegisterUser {
   captcha: string;
 }
 
+export interface RefreshToken {
+  accessToken: string;
+  refreshToken: string;
+}
+
 export interface UpdatePasswordUser {
   email: string;
   password: string;
   captcha: string;
+}
+
+export interface MenuItem {
+  key: string;
+  icon?: string;
+  label: string;
+  children?: MenuItem[];
 }

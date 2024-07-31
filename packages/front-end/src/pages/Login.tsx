@@ -1,5 +1,5 @@
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
-import { useLocalStorageState, useRequest } from "ahooks";
+import { useRequest } from "ahooks";
 import { Button, Checkbox, Form, Input, message } from "antd";
 import { Link, useNavigate } from "react-router-dom";
 import { login } from "../api/request";
@@ -9,10 +9,7 @@ interface FormLoginUser extends LoginUser {
   remember: boolean;
 }
 
-export function Login() {
-  const [, setAccessToken] = useLocalStorageState("accessToken");
-  const [, setRefreshToken] = useLocalStorageState("refreshToken");
-  const [, setUserInfo] = useLocalStorageState("userInfo");
+export default function Login() {
   const navigate = useNavigate();
 
   const { run, loading } = useRequest(login, {
@@ -21,9 +18,9 @@ export function Login() {
       message.success("登录成功");
 
       const { accessToken, refreshToken, userInfo } = result.data;
-      setAccessToken(accessToken);
-      setRefreshToken(refreshToken);
-      setUserInfo(userInfo);
+      localStorage.setItem("accessToken", accessToken);
+      localStorage.setItem("refreshToken", refreshToken);
+      localStorage.setItem("userInfo", JSON.stringify(userInfo));
 
       setTimeout(() => {
         navigate("/");
@@ -41,7 +38,7 @@ export function Login() {
   };
 
   return (
-    <div className="max-w-sm mx-auto">
+    <div className="w-sm h-full mx-auto flex flex-col justify-center">
       <h1 className="text-2xl font-bold py-6 text-center">会议室预订系统</h1>
       <Form initialValues={{ remember: true }} onFinish={onFinish}>
         <Form.Item
@@ -58,8 +55,8 @@ export function Login() {
         </Form.Item>
         <Form.Item>
           <div className="flex justify-between text-blue">
-            <Link to="/register">创建帐号</Link>
-            <Link to="/forgot-password">忘记密码</Link>
+            <Link to="/auth/register">创建帐号</Link>
+            <Link to="/auth/forgot-password">忘记密码</Link>
           </div>
         </Form.Item>
         <Form.Item

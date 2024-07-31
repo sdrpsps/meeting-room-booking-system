@@ -2,6 +2,8 @@ import ky from "ky";
 import type {
   LoginData,
   LoginUser,
+  MenuItem,
+  RefreshToken,
   RegisterUser,
   Response,
   UpdatePasswordUser,
@@ -21,6 +23,25 @@ const request = ky.create({
         }
       },
     ],
+    afterResponse: [
+      async (request, _options, response) => {
+        if (response.status === 401) {
+          try {
+            await refresh();
+            const newAccessToken = localStorage.getItem("accessToken");
+            if (newAccessToken) {
+              // 重试原始请求
+              request.headers.set("Authorization", `Bearer ${newAccessToken}`);
+              return ky(request);
+            }
+          } catch (refreshError) {
+            console.error("Token refresh failed", refreshError);
+            // 处理刷新失败逻辑，例如登出用户
+            throw new Error("Token refresh failed, please log in again");
+          }
+        }
+      },
+    ],
     beforeError: [
       async (error) => {
         const e = await error.response.json();
@@ -29,6 +50,24 @@ const request = ky.create({
     ],
   },
 });
+
+const refresh = async () => {
+  const accessToken = localStorage.getItem("accessToken");
+  const refreshToken = localStorage.getItem("refreshToken");
+  if (!accessToken || !refreshToken) throw new Error("未登录");
+
+  const {
+    data: { accessToken: _accessToken, refreshToken: _refreshToken },
+  } = await ky
+    .get(`${import.meta.env.VITE_API_ADDRESS}/user/refresh`, {
+      searchParams: { refreshToken },
+      headers: { Authorization: `Bearer ${accessToken}` },
+    })
+    .json<Response<RefreshToken>>();
+
+  localStorage.setItem("accessToken", _accessToken);
+  localStorage.setItem("refreshToken", _refreshToken);
+};
 
 export const login = async (data: LoginUser) => {
   return request.post("user/login", { json: data }).json<Response<LoginData>>();
@@ -54,4 +93,8 @@ export const getUpdatePasswordCaptcha = async (address: string) => {
   return request
     .get("user/update_password/captcha", { searchParams: { address } })
     .json<Response<string>>();
+};
+
+export const getRoutes = async () => {
+  return request.get("user/routes").json<Response<MenuItem[]>>();
 };

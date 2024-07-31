@@ -53,3 +53,16 @@ export interface MenuItem {
   label: string;
   children?: MenuItem[];
 }
+
+export interface UpdateUserInfo {
+  avatar?: string;
+  captcha: string;
+  email: string;
+  nickName?: string;
+}
+
+export interface UpdateUserEmail {
+  email: string;
+  newEmail: string;
+  captcha: string;
+}

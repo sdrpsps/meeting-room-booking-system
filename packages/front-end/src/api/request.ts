@@ -7,6 +7,9 @@ import type {
   RegisterUser,
   Response,
   UpdatePasswordUser,
+  UpdateUserEmail,
+  UpdateUserInfo,
+  UserInfo,
 } from "./types";
 
 const request = ky.create({
@@ -97,4 +100,36 @@ export const getUpdatePasswordCaptcha = async (address: string) => {
 
 export const getRoutes = async () => {
   return request.get("user/routes").json<Response<MenuItem[]>>();
+};
+
+export const getUserInfo = async () => {
+  return request.get("user/info").json<Response<UserInfo>>();
+};
+
+export const getUpdateUserInfoCaptcha = async (address: string) => {
+  return request
+    .get("user/update/captcha", { searchParams: { address } })
+    .json<Response<string>>();
+};
+
+export const updateUserInfo = async (data: UpdateUserInfo) => {
+  return request.post("user/update", { json: data }).json<Response<string>>();
+};
+
+export const updateUserEmail = async (data: UpdateUserEmail) => {
+  return request
+    .post("user/update_email", { json: data })
+    .json<Response<string>>();
+};
+
+export const getUpdateUserEmailCaptcha = async (address: string) => {
+  return request
+    .get("user/update_email/captcha", { searchParams: { address } })
+    .json<Response<string>>();
+};
+
+export const upload = async (file: File) => {
+  const formData = new FormData();
+  formData.append("file", file);
+  return request.post("/upload", { body: formData });
 };

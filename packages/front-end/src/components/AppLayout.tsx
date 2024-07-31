@@ -91,13 +91,9 @@ export default function AppLayout() {
           )}
         </Sider>
         <Layout className="px-6 pb-6">
-          <Breadcrumb
-            className="my-4"
-            // itemRender={itemRender}
-            items={breadcrumbItems}
-          ></Breadcrumb>
+          <Breadcrumb className="my-4" items={breadcrumbItems}></Breadcrumb>
           <Content
-            className="p-6 m-0 min-h-70 "
+            className="p-6 overflow-auto"
             style={{
               background: colorBgContainer,
               borderRadius: borderRadiusLG,

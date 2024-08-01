@@ -1,19 +1,21 @@
+import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as AWS from 'aws-sdk';
 import * as multer from 'multer';
 
 @Injectable()
 export class S3Service {
-  private s3: AWS.S3;
-  private logger = new Logger(S3Service.name);
+  private readonly s3: S3Client;
+  private readonly logger = new Logger(S3Service.name);
 
   constructor(private readonly configService: ConfigService) {
-    this.s3 = new AWS.S3({
-      accessKeyId: this.configService.get('S3_ACCESS_KEY_ID'),
-      secretAccessKey: this.configService.get('S3_SECRET_ACCESS_KEY'),
+    this.s3 = new S3Client({
       endpoint: this.configService.get('S3_ENDPOINT_URL'),
       region: this.configService.get('S3_REGION'),
+      credentials: {
+        accessKeyId: this.configService.get('S3_ACCESS_KEY_ID'),
+        secretAccessKey: this.configService.get('S3_SECRET_ACCESS_KEY'),
+      },
     });
   }
 
@@ -25,18 +27,15 @@ export class S3Service {
     return multer.memoryStorage();
   }
 
-  private async uploadFileToS3(
-    file: Express.Multer.File,
-    fileName: string,
-  ): Promise<AWS.S3.ManagedUpload.SendData> {
-    const params = {
+  private async uploadFileToS3(file: Express.Multer.File, fileName: string) {
+    const command = new PutObjectCommand({
       Bucket: this.configService.get('S3_BUCKET_NAME'),
       Key: `${this.configService.get('S3_UPLOAD_KEY')}/${fileName}`,
       Body: file.buffer,
       ContentType: file.mimetype,
-    };
+    });
 
-    return this.s3.upload(params).promise();
+    return this.s3.send(command);
   }
 
   getMulterOptions() {
@@ -55,8 +54,8 @@ export class S3Service {
   async uploadFile(file: Express.Multer.File) {
     const fileName = this.generateFileName(file);
     try {
-      const data = await this.uploadFileToS3(file, fileName);
-      const url = `${this.configService.get('S3_FILE_PREFIX_URL')}/${data.Key}`;
+      await this.uploadFileToS3(file, fileName);
+      const url = `${this.configService.get('S3_FILE_PREFIX_URL')}/${this.configService.get('S3_UPLOAD_KEY')}/${fileName}`;
       this.logger.log(`File uploaded successfully: ${url}`);
 
       return url;

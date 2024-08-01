@@ -78,6 +78,7 @@ export default function UpdateMail({
 
   return (
     <Form
+      name="update-mail"
       form={form}
       labelCol={{ span: 4 }}
       wrapperCol={{ span: 16 }}

@@ -131,5 +131,7 @@ export const getUpdateUserEmailCaptcha = async (address: string) => {
 export const upload = async (file: File) => {
   const formData = new FormData();
   formData.append("file", file);
-  return request.post("/upload", { body: formData });
+  return request
+    .post("user/upload", { body: formData })
+    .json<Response<string>>();
 };

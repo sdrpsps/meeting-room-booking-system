@@ -10,6 +10,7 @@ import {
   Button,
   Col,
   Form,
+  Image,
   Input,
   message,
   Row,
@@ -17,9 +18,13 @@ import {
   type UploadFile,
 } from "antd";
 import { useForm } from "antd/es/form/Form";
-import type { UploadChangeParam } from "antd/es/upload";
+import type { RcFile, UploadChangeParam, UploadProps } from "antd/es/upload";
 import { useCallback, useEffect, useState } from "react";
-import { getUpdateUserInfoCaptcha, updateUserInfo } from "../../../api/request";
+import {
+  getUpdateUserInfoCaptcha,
+  updateUserInfo,
+  upload,
+} from "../../../api/request";
 import type { UpdateUserInfo, UserInfo } from "../../../api/types";
 
 interface UpdateInfoProps {
@@ -30,6 +35,8 @@ interface UpdateInfoProps {
 export default function UpdateInfo({ data, onUpdateSuccess }: UpdateInfoProps) {
   const [form] = useForm();
   const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewImage, setPreviewImage] = useState("");
 
   const onFileChange = ({ fileList }: UploadChangeParam) => {
     setFileList(fileList);
@@ -39,6 +46,45 @@ export default function UpdateInfo({ data, onUpdateSuccess }: UpdateInfoProps) {
   const [countdown] = useCountDown({
     targetDate,
   });
+
+  const { runAsync: runUpload } = useRequest(upload, {
+    manual: true,
+    onSuccess: (data, params: RcFile[]) => {
+      setFileList((prevFileList) =>
+        prevFileList.map((file) =>
+          file.uid === params[0].uid
+            ? { ...file, status: "done", response: data, url: data.data }
+            : file
+        )
+      );
+
+      message.success("上传成功");
+    },
+    onError: (_, params: RcFile[]) => {
+      setFileList((prevFileList) =>
+        prevFileList.map((file) =>
+          file.uid === params[0].uid ? { ...file, status: "error" } : file
+        )
+      );
+
+      message.error("上传错误");
+    },
+  });
+
+  const onUpload: UploadProps["customRequest"] = ({
+    file,
+    onSuccess,
+    onError,
+  }) => {
+    runUpload(file as RcFile)
+      .then(onSuccess)
+      .catch(onError);
+  };
+
+  const onPreview: UploadProps["onPreview"] = (file) => {
+    setPreviewImage(file.url || (file.preview as string));
+    setPreviewOpen(true);
+  };
 
   const { run: getCaptcha, loading: captchaLoading } = useRequest(
     getUpdateUserInfoCaptcha,
@@ -78,7 +124,8 @@ export default function UpdateInfo({ data, onUpdateSuccess }: UpdateInfoProps) {
     form
       .validateFields()
       .then(() => {
-        runUpdate(values);
+        const avatar = fileList[0].url;
+        runUpdate({ ...values, avatar });
       })
       .catch(() => {
         message.error("请完成必填项");
@@ -103,6 +150,7 @@ export default function UpdateInfo({ data, onUpdateSuccess }: UpdateInfoProps) {
 
   return (
     <Form
+      name="update-info"
       form={form}
       labelCol={{ span: 4 }}
       wrapperCol={{ span: 16 }}
@@ -111,11 +159,13 @@ export default function UpdateInfo({ data, onUpdateSuccess }: UpdateInfoProps) {
     >
       <Form.Item label="头像" name="avatar">
         <Upload
-          name="file"
+          name="avatar"
           fileList={fileList}
+          customRequest={onUpload}
           maxCount={1}
           listType="picture-card"
           onChange={onFileChange}
+          onPreview={onPreview}
         >
           {fileList.length >= 1 ? null : (
             <button className="bg-transparent" type="button">
@@ -188,6 +238,17 @@ export default function UpdateInfo({ data, onUpdateSuccess }: UpdateInfoProps) {
           修改信息
         </Button>
       </Form.Item>
+      {previewImage && (
+        <Image
+          wrapperStyle={{ display: "none" }}
+          preview={{
+            visible: previewOpen,
+            onVisibleChange: (visible) => setPreviewOpen(visible),
+            afterOpenChange: (visible) => !visible && setPreviewImage(""),
+          }}
+          src={previewImage}
+        />
+      )}
     </Form>
   );
 }

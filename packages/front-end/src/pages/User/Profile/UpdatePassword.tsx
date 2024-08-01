@@ -79,6 +79,7 @@ export default function UpdatePassword({
 
   return (
     <Form
+      name="update-password"
       form={form}
       labelCol={{ span: 4 }}
       wrapperCol={{ span: 16 }}

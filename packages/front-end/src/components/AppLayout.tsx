@@ -1,5 +1,13 @@
 import { useRequest } from "ahooks";
-import { Breadcrumb, Layout, Menu, theme, type MenuProps } from "antd";
+import {
+  Breadcrumb,
+  ConfigProvider,
+  Layout,
+  Menu,
+  theme,
+  type MenuProps,
+} from "antd";
+import zhCN from "antd/locale/zh_CN";
 import { Suspense, useEffect, useMemo } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { getRoutes } from "../api/request";
@@ -67,44 +75,46 @@ export default function AppLayout() {
   }, [pathname, flatMenuItems, setBreadcrumb]);
 
   return (
-    <Layout>
+    <ConfigProvider locale={zhCN}>
       <Layout>
-        <Sider width={200} style={{ background: colorBgContainer }}>
-          <div className="center m-1 py-1 bg-pink-100 rounded-lg">
-            <img
-              className="h-8"
-              src="https://static.bytespark.app/test/img/avatar.png"
-              alt="logo"
-            />
-          </div>
-          {menuLoading ? (
-            <Loading />
-          ) : (
-            <Menu
-              className="h-full border-0 overflow-y-auto"
-              mode="inline"
-              defaultOpenKeys={defaultOpenKeys}
-              selectedKeys={selectedKeys}
-              items={menuItems}
-              onClick={onNavigate}
-            />
-          )}
-        </Sider>
-        <Layout className="px-6 pb-6">
-          <Breadcrumb className="my-4" items={breadcrumbItems}></Breadcrumb>
-          <Content
-            className="p-6 overflow-auto"
-            style={{
-              background: colorBgContainer,
-              borderRadius: borderRadiusLG,
-            }}
-          >
-            <Suspense fallback={<Loading />}>
-              <Outlet />
-            </Suspense>
-          </Content>
+        <Layout>
+          <Sider width={200} style={{ background: colorBgContainer }}>
+            <div className="center m-1 py-1 bg-pink-100 rounded-lg">
+              <img
+                className="h-8"
+                src="https://static.bytespark.app/test/img/avatar.png"
+                alt="logo"
+              />
+            </div>
+            {menuLoading ? (
+              <Loading />
+            ) : (
+              <Menu
+                className="h-full border-0 overflow-y-auto"
+                mode="inline"
+                defaultOpenKeys={defaultOpenKeys}
+                selectedKeys={selectedKeys}
+                items={menuItems}
+                onClick={onNavigate}
+              />
+            )}
+          </Sider>
+          <Layout className="px-6 pb-6">
+            <Breadcrumb className="my-4" items={breadcrumbItems}></Breadcrumb>
+            <Content
+              className="p-6 overflow-auto"
+              style={{
+                background: colorBgContainer,
+                borderRadius: borderRadiusLG,
+              }}
+            >
+              <Suspense fallback={<Loading />}>
+                <Outlet />
+              </Suspense>
+            </Content>
+          </Layout>
         </Layout>
       </Layout>
-    </Layout>
+    </ConfigProvider>
   );
 }

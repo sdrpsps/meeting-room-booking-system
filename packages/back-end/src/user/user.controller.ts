@@ -7,9 +7,14 @@ import {
   ParseIntPipe,
   Post,
   Query,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import * as multer from 'multer';
 import { RequireLogin } from 'src/common/decorators/require-login.decorator';
 import { CaptchaService } from 'src/common/services/captcha.service';
+import { S3Service } from 'src/common/services/s3.service';
 import { UserInfo } from './decorators/user-info.decorator';
 import { LoginUserDto } from './dto/login-user.dto';
 import { RegisterUserDto } from './dto/register-user.dto';
@@ -23,6 +28,7 @@ export class UserController {
   constructor(
     private readonly userService: UserService,
     private readonly captchaService: CaptchaService,
+    private readonly s3Service: S3Service,
   ) {}
 
   @Post('register')
@@ -203,5 +209,12 @@ export class UserController {
         ],
       },
     ];
+  }
+
+  @Post('upload')
+  @RequireLogin()
+  @UseInterceptors(FileInterceptor('file', { storage: multer.memoryStorage() }))
+  async uploadFile(@UploadedFile() file: Express.Multer.File) {
+    return await this.s3Service.uploadFile(file);
   }
 }

@@ -1,5 +1,7 @@
 import ky from "ky";
+import { toSearchParams } from "../utils/toSearchParams";
 import type {
+  GetUserListParams,
   LoginData,
   LoginUser,
   MenuItem,
@@ -10,6 +12,7 @@ import type {
   UpdateUserEmail,
   UpdateUserInfo,
   UserInfo,
+  UserListResponse,
 } from "./types";
 
 const request = ky.create({
@@ -134,4 +137,10 @@ export const upload = async (file: File) => {
   return request
     .post("user/upload", { body: formData })
     .json<Response<string>>();
+};
+
+export const getUserList = (data: GetUserListParams) => {
+  return request
+    .get("user/list", { searchParams: toSearchParams(data) })
+    .json<Response<UserListResponse>>();
 };

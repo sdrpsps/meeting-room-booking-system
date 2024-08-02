@@ -66,3 +66,30 @@ export interface UpdateUserEmail {
   newEmail: string;
   captcha: string;
 }
+
+export interface GetUserListParams {
+  name: string;
+  nickName: string;
+  email: string;
+  pageNum: number;
+  pageSize: number;
+}
+
+export interface UserListResponse {
+  users: User[];
+  total: number;
+}
+
+export interface User {
+  avatar: null | string;
+  createdAt: string;
+  email: string;
+  id: number;
+  isAdmin: boolean;
+  isFrozen: boolean;
+  name: string;
+  nickName: string;
+  phoneNumber: null;
+  roleId: number;
+  updatedAt: string;
+}

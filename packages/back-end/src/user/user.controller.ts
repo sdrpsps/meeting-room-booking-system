@@ -166,8 +166,11 @@ export class UserController {
 
   @Get('freeze')
   @RequireLogin()
-  async freeze(@Query('id', ParseIntPipe) userId: number) {
-    return await this.userService.freezeUserById(userId);
+  async freeze(
+    @Query('id', ParseIntPipe) userId: number,
+    @Query('isFreeze', ParseIntPipe) isFreeze: number,
+  ) {
+    return await this.userService.freezeUserById(userId, !!isFreeze);
   }
 
   @Get('list')

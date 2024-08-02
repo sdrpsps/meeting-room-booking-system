@@ -144,3 +144,9 @@ export const getUserList = (data: GetUserListParams) => {
     .get("user/list", { searchParams: toSearchParams(data) })
     .json<Response<UserListResponse>>();
 };
+
+export const freezeUser = (id: number, isFreeze: 1 | 0) => {
+  return request
+    .get("user/freeze", { searchParams: { id, isFreeze } })
+    .json<Response<string>>();
+};

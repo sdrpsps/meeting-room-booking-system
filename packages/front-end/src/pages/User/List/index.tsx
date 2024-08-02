@@ -14,7 +14,7 @@ import {
 } from "antd";
 import { useForm } from "antd/es/form/Form";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { getUserList } from "../../../api/request";
+import { freezeUser, getUserList } from "../../../api/request";
 import type { GetUserListParams, User } from "../../../api/types";
 import { getTableScroll } from "../../../utils/getTableScroll";
 
@@ -27,9 +27,44 @@ export default function List() {
   const tableRef = useRef(null);
   const [scrollY, setScrollY] = useState("");
 
+  const { run, loading: tableLoading } = useRequest(getUserList, {
+    manual: true,
+    onSuccess(data) {
+      setUserResult(data.data.users);
+      setTotal(data.data.total);
+    },
+    onError(error) {
+      message.error(error.message);
+    },
+  });
+
+  const { run: runFreeze, loading: freezeLoading } = useRequest(freezeUser, {
+    manual: true,
+    onSuccess(data) {
+      message.success(data.data);
+      fetchData();
+    },
+  });
+
   const columns: TableProps<User>["columns"] = useMemo(
     () => [
-      { title: "操作", align: "center", width: 100 },
+      {
+        title: "操作",
+        dataIndex: "id",
+        align: "center",
+        width: 100,
+        render: (value, record) => {
+          return (
+            <Button
+              danger
+              type="text"
+              onClick={() => runFreeze(value, record.isFrozen ? 0 : 1)}
+            >
+              {record.isFrozen ? "解冻" : "冻结"}
+            </Button>
+          );
+        },
+      },
       { title: "用户名", dataIndex: "name", align: "center" },
       { title: "昵称", dataIndex: "nickName", align: "center" },
       {
@@ -57,19 +92,8 @@ export default function List() {
         render: (value) => (value ? <Tag color="green">是</Tag> : null),
       },
     ],
-    []
+    [runFreeze]
   );
-
-  const { run, loading: tableLoading } = useRequest(getUserList, {
-    manual: true,
-    onSuccess(data) {
-      setUserResult(data.data.users);
-      setTotal(data.data.total);
-    },
-    onError(error) {
-      message.error(error.message);
-    },
-  });
 
   const fetchData = useCallback(() => {
     const formValues = form.getFieldsValue();
@@ -142,7 +166,7 @@ export default function List() {
       </Form>
       <Table
         dataSource={userResult}
-        loading={tableLoading}
+        loading={tableLoading || freezeLoading}
         columns={columns}
         rowKey={(record) => record.id}
         pagination={{

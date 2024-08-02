@@ -274,20 +274,23 @@ export class UserService {
     }
   }
 
-  async freezeUserById(userId: number) {
+  async freezeUserById(userId: number, isFreeze: boolean) {
     try {
       await this.prismaService.user.update({
         where: {
           id: userId,
         },
         data: {
-          isFrozen: true,
+          isFrozen: isFreeze,
         },
       });
-      return '冻结成功';
+      return `${isFreeze ? '冻结' : '解冻'}成功`;
     } catch (error) {
       this.logger.error(error, UserService);
-      throw new HttpException('冻结失败', HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        `${isFreeze ? '冻结' : '解冻'}失败`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 

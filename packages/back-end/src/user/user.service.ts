@@ -318,9 +318,6 @@ export class UserService {
         where,
         take: pageSize,
         skip: (pageNum - 1) * pageSize,
-        orderBy: {
-          id: 'desc',
-        },
       }),
     ]);
 
@@ -328,8 +325,11 @@ export class UserService {
       total,
       users: users.map((item) => {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { password, ...rest } = item;
-        return rest;
+        const { password, createdAt, ...rest } = item;
+        return {
+          ...rest,
+          createdAt: createdAt.toLocaleString(),
+        };
       }),
     };
   }

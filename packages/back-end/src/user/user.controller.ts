@@ -195,16 +195,20 @@ export class UserController {
       {
         key: '/app/dashboard',
         icon: 'DashboardOutlined',
-        label: 'DashBoard',
+        label: '仪表盘',
       },
       {
         key: '/app/user',
         icon: 'UserOutlined',
-        label: 'User',
+        label: '用户',
         children: [
           {
             key: '/app/user/profile',
-            label: 'Profile',
+            label: '个人信息',
+          },
+          {
+            key: '/app/user/list',
+            label: '列表',
           },
         ],
       },

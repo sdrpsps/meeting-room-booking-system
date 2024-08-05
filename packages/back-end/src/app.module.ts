@@ -5,9 +5,10 @@ import { JwtModule } from '@nestjs/jwt';
 import { LoginGuard } from './common/guards/login.guard';
 import { PermissionGuard } from './common/guards/permission.guard';
 import { EmailModule } from './email/email.module';
+import { MeetingRoomModule } from './meeting-room/meeting-room.module';
+import { PrismaModule } from './prisma/prisma.module';
 import { RedisModule } from './redis/redis.module';
 import { UserModule } from './user/user.module';
-import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { PrismaModule } from './prisma/prisma.module';
     UserModule,
     RedisModule,
     EmailModule,
+    MeetingRoomModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: LoginGuard },

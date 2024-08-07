@@ -174,6 +174,7 @@ export class UserController {
   }
 
   @Get('list')
+  @RequireLogin()
   async list(
     @Query('pageNum', new DefaultValuePipe(1), ParseIntPipe) pageNum: number,
     @Query('pageSize', new DefaultValuePipe(2), ParseIntPipe) pageSize: number,

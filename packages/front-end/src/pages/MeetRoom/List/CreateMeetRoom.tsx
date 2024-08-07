@@ -33,8 +33,8 @@ export default function CreateMeetRoom({
 
   const { run, loading } = useRequest(createMeetRoom, {
     manual: true,
-    onSuccess(data) {
-      message.success(data.data);
+    onSuccess(result) {
+      message.success(result);
       setIsModalOpen(false);
       fetchData();
       form.resetFields();

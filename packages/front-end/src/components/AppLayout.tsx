@@ -48,7 +48,7 @@ export default function AppLayout() {
 
   const { loading: menuLoading } = useRequest(getRoutes, {
     onSuccess: (data) => {
-      setMenu(data.data);
+      setMenu(data);
     },
   });
 

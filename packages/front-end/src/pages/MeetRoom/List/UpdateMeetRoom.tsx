@@ -37,10 +37,10 @@ export default function UpdateMeetRoom({
     getMeetRoom,
     {
       manual: true,
-      onSuccess(data) {
+      onSuccess(result) {
         form.setFieldsValue({
-          ...data.data,
-          equipment: data.data.equipment.split(","),
+          ...result,
+          equipment: result.equipment.split(","),
         });
       },
       onError(error) {
@@ -51,8 +51,8 @@ export default function UpdateMeetRoom({
 
   const { run, loading } = useRequest(updateMeetRoom, {
     manual: true,
-    onSuccess(data) {
-      message.success(data.data);
+    onSuccess(result) {
+      message.success(result);
       setIsModalOpen(false);
       fetchData();
       form.resetFields();

@@ -18,7 +18,7 @@ export default function Profile() {
 
   const { run } = useRequest(getUserInfo, {
     onSuccess: (result) => {
-      setUserInfo(result.data);
+      setUserInfo(result);
     },
   });
 

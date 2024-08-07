@@ -17,7 +17,7 @@ export default function Login() {
     onSuccess: (result) => {
       message.success("登录成功");
 
-      const { accessToken, refreshToken, userInfo } = result.data;
+      const { accessToken, refreshToken, userInfo } = result;
       localStorage.setItem("accessToken", accessToken);
       localStorage.setItem("refreshToken", refreshToken);
       localStorage.setItem("userInfo", JSON.stringify(userInfo));

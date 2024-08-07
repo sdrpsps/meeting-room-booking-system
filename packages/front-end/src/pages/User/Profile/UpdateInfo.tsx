@@ -49,11 +49,11 @@ export default function UpdateInfo({ data, onUpdateSuccess }: UpdateInfoProps) {
 
   const { runAsync: runUpload } = useRequest(upload, {
     manual: true,
-    onSuccess: (data, params: RcFile[]) => {
+    onSuccess: (result, params: RcFile[]) => {
       setFileList((prevFileList) =>
         prevFileList.map((file) =>
           file.uid === params[0].uid
-            ? { ...file, status: "done", response: data, url: data.data }
+            ? { ...file, status: "done", response: result, url: result }
             : file
         )
       );

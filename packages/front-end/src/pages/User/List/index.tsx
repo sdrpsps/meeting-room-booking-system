@@ -27,9 +27,9 @@ export default function List() {
 
   const { run, loading: tableLoading } = useRequest(getUserList, {
     manual: true,
-    onSuccess(data) {
-      setUserResult(data.data.list);
-      setTotal(data.data.total);
+    onSuccess(result) {
+      setUserResult(result.list);
+      setTotal(result.total);
     },
     onError(error) {
       message.error(error.message);
@@ -38,8 +38,8 @@ export default function List() {
 
   const { run: runFreeze, loading: freezeLoading } = useRequest(freezeUser, {
     manual: true,
-    onSuccess(data) {
-      message.success(data.data);
+    onSuccess(result) {
+      message.success(result);
       fetchData();
     },
   });

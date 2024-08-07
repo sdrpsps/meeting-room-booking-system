@@ -31,9 +31,9 @@ export default function List() {
 
   const { run, loading: tableLoading } = useRequest(getMeetRoomList, {
     manual: true,
-    onSuccess(data) {
-      setMeetRoomResult(data.data.list);
-      setTotal(data.data.total);
+    onSuccess(result) {
+      setMeetRoomResult(result.list);
+      setTotal(result.total);
     },
     onError(error) {
       message.error(error.message);
@@ -44,8 +44,8 @@ export default function List() {
     deleteMeetRoom,
     {
       manual: true,
-      onSuccess(data) {
-        message.success(data.data);
+      onSuccess(result) {
+        message.success(result);
         fetchData();
       },
       onError(error) {

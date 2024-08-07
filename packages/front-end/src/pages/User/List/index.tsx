@@ -7,16 +7,16 @@ import {
   Input,
   message,
   Row,
+  Space,
   Table,
   Tag,
   type PaginationProps,
   type TableProps,
 } from "antd";
 import { useForm } from "antd/es/form/Form";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { freezeUser, getUserList } from "../../../api/request";
 import type { GetUserListParams, User } from "../../../api/types";
-import { getTableScroll } from "../../../utils/getTableScroll";
 
 export default function List() {
   const [pageNum, setPageNum] = useState<number>(1);
@@ -24,13 +24,11 @@ export default function List() {
   const [total, setTotal] = useState<number>(0);
   const [userResult, setUserResult] = useState<User[]>();
   const [form] = useForm();
-  const tableRef = useRef(null);
-  const [scrollY, setScrollY] = useState("");
 
   const { run, loading: tableLoading } = useRequest(getUserList, {
     manual: true,
     onSuccess(data) {
-      setUserResult(data.data.users);
+      setUserResult(data.data.list);
       setTotal(data.data.total);
     },
     onError(error) {
@@ -82,7 +80,8 @@ export default function List() {
         dataIndex: "isFrozen",
         align: "center",
         width: 100,
-        render: (value) => (value ? <Tag color="red">已冻结</Tag> : null),
+        render: (value) =>
+          value ? <Tag color="red">已冻结</Tag> : <Tag color="green">正常</Tag>,
       },
       {
         title: "管理员",
@@ -114,6 +113,10 @@ export default function List() {
     [pageSize]
   );
 
+  const onReset = () => {
+    form.resetFields();
+  };
+
   const onFinish = useCallback(
     (values: Omit<GetUserListParams, "pageNum" | "pageSize">) => {
       setPageNum(1);
@@ -126,12 +129,8 @@ export default function List() {
     fetchData();
   }, [fetchData, pageNum, pageSize, run]);
 
-  useEffect(() => {
-    setScrollY(getTableScroll({ ref: tableRef }));
-  }, []);
-
   return (
-    <div ref={tableRef}>
+    <>
       <Form
         className="mb-6"
         form={form}
@@ -140,26 +139,29 @@ export default function List() {
         onFinish={onFinish}
       >
         <Row className="w-full">
-          <Col span={7}>
+          <Col span={6}>
             <Form.Item label="用户名" name="name">
               <Input />
             </Form.Item>
           </Col>
-          <Col span={7}>
+          <Col span={6}>
             <Form.Item label="昵称" name="nickName">
               <Input />
             </Form.Item>
           </Col>
-          <Col span={7}>
+          <Col span={6}>
             <Form.Item label="邮箱" name="email">
               <Input />
             </Form.Item>
           </Col>
-          <Col span={3}>
+          <Col span={6}>
             <Form.Item>
-              <Button type="primary" htmlType="submit">
-                搜索
-              </Button>
+              <Space>
+                <Button type="primary" htmlType="submit">
+                  搜索
+                </Button>
+                <Button onClick={onReset}>重置</Button>
+              </Space>
             </Form.Item>
           </Col>
         </Row>
@@ -177,8 +179,7 @@ export default function List() {
           total,
           onChange: onTableChange,
         }}
-        scroll={{ y: scrollY }}
       />
-    </div>
+    </>
   );
 }

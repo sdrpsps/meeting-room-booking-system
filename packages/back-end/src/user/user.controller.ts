@@ -215,6 +215,17 @@ export class UserController {
           },
         ],
       },
+      {
+        key: '/app/meeting-room',
+        icon: 'FundProjectionScreenOutlined',
+        label: '会议室',
+        children: [
+          {
+            key: '/app/meeting-room/list',
+            label: '列表',
+          },
+        ],
+      },
     ];
   }
 

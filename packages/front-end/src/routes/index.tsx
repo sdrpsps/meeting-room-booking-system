@@ -16,6 +16,7 @@ const Register = lazy(() => import("../pages/Register"));
 const ForgotPassword = lazy(() => import("../pages/ForgotPassword"));
 const UserProfile = lazy(() => import("../pages/User/Profile"));
 const UserList = lazy(() => import("../pages/User/List"));
+const MeetRoomList = lazy(() => import("../pages/MeetRoom/List"));
 
 function isAuthenticated() {
   return (
@@ -61,6 +62,11 @@ const routes: RouteObject[] = [
           { path: "profile", element: <UserProfile /> },
           { path: "list", element: <UserList /> },
         ],
+      },
+      {
+        path: "meeting-room",
+        element: <Outlet />,
+        children: [{ path: "list", element: <MeetRoomList /> }],
       },
     ],
   },

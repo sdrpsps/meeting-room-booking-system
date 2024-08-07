@@ -76,7 +76,7 @@ export interface GetUserListParams {
 }
 
 export interface UserListResponse {
-  users: User[];
+  list: User[];
   total: number;
 }
 
@@ -92,4 +92,40 @@ export interface User {
   phoneNumber: null;
   roleId: number;
   updatedAt: string;
+}
+
+export interface GetMeetRoomListParams {
+  name: string;
+  capacity: string;
+  equipment: string;
+  pageNum: number;
+  pageSize: number;
+}
+
+export interface MeetRoomListResponse {
+  list: MeetRoom[];
+  total: number;
+}
+
+export interface MeetRoom {
+  capacity: number;
+  createdAt: string;
+  description: string;
+  equipment: string;
+  id: number;
+  isBooked: boolean;
+  location: string;
+  name: string;
+  updatedAt: string;
+}
+export interface CreateMeetRoomParams {
+  capacity: number;
+  description: string;
+  equipment: string;
+  location: string;
+  name: string;
+}
+
+export interface UpdateMeetingRoomParams extends CreateMeetRoomParams {
+  id: number;
 }

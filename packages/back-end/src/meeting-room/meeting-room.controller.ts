@@ -35,6 +35,11 @@ export class MeetingRoomController {
     );
   }
 
+  @Get(':id')
+  async info(@Param('id', ParseIntPipe) id: number) {
+    return await this.meetingRoomService.findOneById(id);
+  }
+
   @Post('create')
   async create(@Body() meetingRoomDto: CreateMeetingRoomDto) {
     return await this.meetingRoomService.create({
@@ -52,7 +57,7 @@ export class MeetingRoomController {
     });
   }
 
-  @Delete(':id')
+  @Delete('delete/:id')
   async delete(@Param('id', ParseIntPipe) id: number) {
     return this.meetingRoomService.delete(id);
   }

@@ -313,7 +313,7 @@ export class UserService {
       where.email = { contains: email };
     }
 
-    const [total, users] = await this.prismaService.$transaction([
+    const [total, data] = await this.prismaService.$transaction([
       this.prismaService.user.count({
         where,
       }),
@@ -326,7 +326,7 @@ export class UserService {
 
     return {
       total,
-      users: users.map((item) => {
+      list: data.map((item) => {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { password, createdAt, ...rest } = item;
         return {

@@ -40,12 +40,24 @@ export class MeetingRoomService {
 
     return {
       total,
-      data: data.map((item) => ({
+      list: data.map((item) => ({
         ...item,
         createdAt: item.createdAt.toLocaleString(),
         updatedAt: item.updatedAt.toLocaleString(),
       })),
     };
+  }
+
+  async findOneById(id: number) {
+    const room = await this.prismaService.meetingRoom.findFirst({
+      where: { id },
+    });
+
+    if (!room) {
+      throw new BadRequestException('会议室不存在');
+    }
+
+    return room;
   }
 
   async create(meetingRoomDto: CreateMeetingRoomDto) {

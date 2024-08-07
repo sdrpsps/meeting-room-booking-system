@@ -1,13 +1,18 @@
 import ky from "ky";
 import { toSearchParams } from "../utils/toSearchParams";
 import type {
+  CreateMeetRoomParams,
+  GetMeetRoomListParams,
   GetUserListParams,
   LoginData,
   LoginUser,
+  MeetRoom,
+  MeetRoomListResponse,
   MenuItem,
   RefreshToken,
   RegisterUser,
   Response,
+  UpdateMeetingRoomParams,
   UpdatePasswordUser,
   UpdateUserEmail,
   UpdateUserInfo,
@@ -148,5 +153,31 @@ export const getUserList = (data: GetUserListParams) => {
 export const freezeUser = (id: number, isFreeze: 1 | 0) => {
   return request
     .get("user/freeze", { searchParams: { id, isFreeze } })
+    .json<Response<string>>();
+};
+
+export const getMeetRoomList = (data: GetMeetRoomListParams) => {
+  return request
+    .get("meeting-room/list", { searchParams: toSearchParams(data) })
+    .json<Response<MeetRoomListResponse>>();
+};
+
+export const getMeetRoom = (id: number) => {
+  return request.get(`meeting-room/${id}`).json<Response<MeetRoom>>();
+};
+
+export const deleteMeetRoom = (id: number) => {
+  return request.delete(`meeting-room/delete/${id}`).json<Response<string>>();
+};
+
+export const createMeetRoom = (data: CreateMeetRoomParams) => {
+  return request
+    .post(`meeting-room/create`, { json: data })
+    .json<Response<string>>();
+};
+
+export const updateMeetRoom = (data: UpdateMeetingRoomParams) => {
+  return request
+    .put(`meeting-room/update`, { json: data })
     .json<Response<string>>();
 };
